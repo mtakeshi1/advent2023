@@ -136,33 +136,38 @@ class Graph:
         low = min([n.row for n in fences])
         high = max([n.row for n in fences]) + 1
         count = 0
+        selected = []
         for row_i in range(low, high):
             row = sorted([n.col for n in fences if n.row == row_i])
             inside = True
             for col_i in range(1, len(row)):
                 if inside:
                     count += row[col_i] - row[col_i - 1] - 1
+                    for x in range(row[col_i - 1], row[col_i]):
+                        selected.append(Node(row_i, x))
                 inside = not inside
 
         # print(fences)
+        self.print(selected)
         return count
 
 
-input = """ ...........
-            .S-------7.
-            .|F-----7|.
-            .||.....||.
-            .||.....||.
-            .|L-7.F-J|.
-            .|..|.|..|.
-            .L--J.L--J.
-            ..........."""
+input = """ .F----7F7F7F7F-7....
+            .|F--7||||||||FJ....
+            .||.FJ||||||||L7....
+            FJL7L7LJLJ||LJ.L-7..
+            L--J.L7...LJS7F-7L7.
+            ....F-J..F7FJ|L7L7L7
+            ....L7.F7||L7|.L7L7|
+            .....|FJLJ|FJ|F7|.LJ
+            ....FJL-7.||.||||...
+            ....L---J.LJ.LJLJ..."""
 
 graph = Graph()
 graph.add_lines([c.strip() for c in input.split('\n')])
 print(graph.solve_b())
-
-with open('d10.txt', 'r') as file:
-    graph = Graph()
-    graph.add_lines([c.strip() for c in file.readlines()])
-    print(graph.solve_b())
+#
+# with open('d10.txt', 'r') as file:
+#     graph = Graph()
+#     graph.add_lines([c.strip() for c in file.readlines()])
+#     print(graph.solve_b())
