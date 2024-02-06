@@ -47,6 +47,7 @@ def solve_a(lines: list[str], starting=(0, 0, '>')):
     lit: set[tuple[int, int]] = set()
     beams: list[tuple[int, int, str]] = [starting]
     tiles[starting[0]][starting[1]] = '.'
+
     def debug():
         to_print = copy.deepcopy(tiles)
         for r, c, d in beams:
@@ -92,7 +93,7 @@ def solve_b(lines: list[str]):
     all_starting = ([(row, 0, '>') for row in range(len(lines))] +
                     [(row, cols - 1, '<') for row in range(len(lines))] +
                     [(0, c, 'v') for c in range(cols)] +
-                    [(len(lines)-1, c, '^') for c in range(cols)])
+                    [(len(lines) - 1, c, '^') for c in range(cols)])
     return max([solve_a(lines, s) for s in all_starting])
 
 
