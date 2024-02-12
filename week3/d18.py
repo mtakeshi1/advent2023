@@ -179,6 +179,9 @@ class Rect:
     def size(self):
         return abs(self.x1 - self.x0) * (self.y1 - self.y0)
 
+    def __contains__(self, item):
+        return self.x0 <= item.x0 <= item.x1 <= self.x1 and self.y0 <= item.y0 <= item.y1 <= self.y1
+
 
 def solve_b(lines: list[str]):
     dirs = [(0, 1), (1, 0), (0, -1), (-1, 0)]
@@ -194,27 +197,55 @@ def solve_b(lines: list[str]):
         ny = col + dy * amount
         rows.add(nx)
         cols.add(ny)
-        if dx > 0:
-            rects[Rect(row, col, nx, ny + 1)] = True
+        if dx != 0:
+            x0, x1 = sorted([row, nx])
+            y0, y1 = sorted([col, ny + 1])
+            rects[Rect(x0, y0, x1, y1)] = True
             cols.add(ny + 1)
         else:
-            rects[Rect(row, col, nx + 1, ny)] = True
+            x0, x1 = sorted([row, nx+1])
+            y0, y1 = sorted([col, ny])
+            rects[Rect(x0, y0, x1, y1)] = True
             rows.add(nx + 1)
         row, col = nx, ny
-
     rows = list(sorted(rows))
-    cols = list(sorted(rows))
+    cols = list(sorted(cols))
     num_rows = len(rows) - 1
     num_cols = len(cols) - 1
 
     def rect_for(x, y):
         return Rect(rows[x], cols[y], rows[x + 1], cols[y + 1])
 
+    for rect in list(rects.keys()):
+        for row in range(num_rows):
+            for col in range(num_cols):
+                r = rect_for(row, col)
+                if r in rect:
+                    rects[r] = True
+
+    def print_matrix():
+        print(''.join(["{:9d}".format(c) for c in cols]))
+        for row in range(num_rows):
+            pre = '{:7d}'.format(rows[row])
+            for col in range(num_cols):
+                rect = rect_for(row, col)
+                if rect in rects.keys():
+                    if rects.get(rect):
+                        c = '  ###  '
+                    else:
+                        c = ' ' * 7
+                else:
+                    c = '  ???  '
+                pre += c
+            print(pre)
+
     queue = ([(0, y) for y in range(0, num_cols - 1) if rect_for(0, y) not in rects] +
              [(num_rows - 1, y) for y in range(0, num_cols - 1) if rect_for(num_rows - 1, y) not in rects] +
              [(x, 0) for x in range(0, num_rows) if rect_for(x, 0) not in rects] +
              [(x, num_cols - 1) for x in range(0, num_rows - 1) if rect_for(x, num_cols - 1) not in rects])
 
+    print_matrix()
+    print()
     while len(queue) > 0:
         first = queue.pop()
         if first in rects:
@@ -225,26 +256,14 @@ def solve_b(lines: list[str]):
             ny = first[1] + dy
             if 0 <= nx < num_rows and 0 <= ny < num_cols and rect_for(nx, ny) not in rects:
                 queue.append((nx, ny,))
-    print(''.join(["{:7d}".format(c) for c in cols]))
-    for row in range(num_rows):
-        pre = '{:7d}'.format(rows[row])
-        for col in range(num_cols):
-            rect = rect_for(row, col)
-            if rect in rects.keys():
-                if rects.get(rect):
-                    c = '  ###  '
-                else:
-                    c = ' ' * 7
-            else:
-                c = '  ???  '
-            pre += c
-        print(pre)
+
     for x in range(num_rows):
         for y in range(num_cols):
             r = rect_for(x, y)
             if r not in rects:
                 rects[r] = True
-    print(f'{len(rows)} x {len(cols)}')
+    print_matrix()
+    print(f'\nsquare: {len(rows)} x {len(cols)}')
     return sum([k.size() for k, v in rects.items() if v])
 
 
